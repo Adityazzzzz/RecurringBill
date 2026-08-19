@@ -1,4 +1,4 @@
-import { icons } from "./icons";
+import { icons } from "./icon";
 
 export const tabs: AppTab[] = [
     { name: "index", title: "Home", icon: icons.home },
@@ -8,7 +8,7 @@ export const tabs: AppTab[] = [
 ];
 
 export const HOME_USER = {
-    name: "Adrian | JS Mastery",
+    name: "Aditya | Studio",
 };
 
 export const HOME_BALANCE = {
