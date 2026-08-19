@@ -1,7 +1,7 @@
 import { View, Text, Modal, Pressable, TextInput, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import React, { useState } from 'react';
 import clsx from 'clsx';
-import { icons } from '@/constants/icons';
+import { icons } from '@/constants/icon';
 import dayjs from 'dayjs';
 import {posthog} from "@/src/config/posthog";
 
