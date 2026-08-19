@@ -1,4 +1,4 @@
-import { Stack, Redirect } from "expo-router";
+import { Stack, Redirect, type Href } from "expo-router";
 import { useAuth } from '@clerk/expo';
 import '@/global.css';
 
@@ -12,7 +12,7 @@ export default function AuthLayout() {
 
     // Redirect to home if user is already signed in
     if (isSignedIn) {
-        return <Redirect href="/(tabs)" />;
+        return <Redirect href={"/(tabs)/" as Href}/>;
     }
 
     return <Stack screenOptions={{ headerShown: false }} />;

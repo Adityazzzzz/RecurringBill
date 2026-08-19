@@ -2,11 +2,8 @@ import { View, Text, TextInput, Pressable, ScrollView, KeyboardAvoidingView, Pla
 import { Link, useRouter, type Href } from 'expo-router';
 import { useSignUp, useAuth } from '@clerk/expo';
 import { useState } from 'react';
-import { SafeAreaView as RNSafeAreaView } from 'react-native-safe-area-context';
-import { styled } from 'nativewind';
+import { SafeAreaView  } from 'react-native-safe-area-context';
 import { usePostHog } from 'posthog-react-native';
-
-const SafeAreaView = styled(RNSafeAreaView);
 
 const SignUp = () => {
     const { signUp, errors, fetchStatus } = useSignUp();

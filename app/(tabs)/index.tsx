@@ -1,10 +1,9 @@
 import "@/global.css"
 import {FlatList, Image, Pressable, Text, View} from "react-native";
-import {SafeAreaView as RNSafeAreaView} from "react-native-safe-area-context";
-import { styled } from "nativewind";
+import {SafeAreaView} from "react-native-safe-area-context";
 import images from "@/constants/images";
 import {HOME_BALANCE} from "@/constants/data";
-import {icons} from "@/constants/icons";
+import { icons } from "@/constants/icon";
 import {formatCurrency} from "@/lib/utils";
 import dayjs from "dayjs";
 import ListHeading from "@/components/ListHeading";
@@ -15,7 +14,6 @@ import {useState, useMemo} from "react";
 import { useUser } from '@clerk/expo';
 import { usePostHog } from 'posthog-react-native';
 import { useSubscriptionStore } from "@/lib/subscriptionStore";
-const SafeAreaView = styled(RNSafeAreaView);
 
 export default function App() {
     const { user } = useUser();
@@ -28,11 +26,17 @@ export default function App() {
     const upcomingSubscriptions = useMemo(() => {
         const now = dayjs();
         const nextWeek = now.add(7, 'days');
-        return subscriptions.filter(sub =>
-            sub.status === 'active' &&
-            dayjs(sub.renewalDate).isAfter(now) &&
-            dayjs(sub.renewalDate).isBefore(nextWeek)
-        ).sort((a, b) => dayjs(a.renewalDate).diff(dayjs(b.renewalDate)));
+        return subscriptions
+            .filter(sub =>
+                sub.status === 'active' &&
+                dayjs(sub.renewalDate).isAfter(now) &&
+                dayjs(sub.renewalDate).isBefore(nextWeek)
+            )
+            .map(sub => ({
+                ...sub,
+                daysLeft: dayjs(sub.renewalDate).diff(now, 'day')
+            }))
+            .sort((a, b) => dayjs(a.renewalDate).diff(dayjs(b.renewalDate)));
     }, [subscriptions]);
 
     const handleSubscriptionPress = (item: Subscription) => {
@@ -49,8 +53,8 @@ export default function App() {
         posthog.capture('subscription_created', {
             subscription_name: newSubscription.name,
             subscription_price: newSubscription.price,
-            subscription_frequency: newSubscription.frequency,
-            subscription_category: newSubscription.category,
+            subscription_frequency: newSubscription.frequency || '' ,
+            subscription_category: newSubscription.category || 'Uncategorized',
         });
     };
 
@@ -118,7 +122,7 @@ export default function App() {
                     ItemSeparatorComponent={() => <View className="h-4" />}
                     showsVerticalScrollIndicator={false}
                     ListEmptyComponent={<Text className="home-empty-state">No subscriptions yet.</Text>}
-                    contentContainerClassName="pb-30"
+                    contentContainerStyle={{ paddingBottom: 120 }}
                 />
 
             <CreateSubscriptionModal

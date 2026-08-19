@@ -1,11 +1,8 @@
 import { Text, View, Pressable, Image } from 'react-native'
-import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
-import { styled } from "nativewind";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useClerk, useUser } from '@clerk/expo';
 import images from '@/constants/images';
 import { usePostHog } from 'posthog-react-native';
-
-const SafeAreaView = styled(RNSafeAreaView);
 
 const Settings = () => {
     const { signOut } = useClerk();

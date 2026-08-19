@@ -1,11 +1,9 @@
 import {Text, View, TextInput, FlatList} from 'react-native'
-import {SafeAreaView as RNSafeAreaView} from "react-native-safe-area-context";
-import { styled } from "nativewind";
+import {SafeAreaView} from "react-native-safe-area-context";
 import { useState } from "react";
 import SubscriptionCard from "@/components/SubscriptionCard";
 import { useSubscriptionStore } from "@/lib/subscriptionStore";
 
-const SafeAreaView = styled(RNSafeAreaView);
 
 const Subscriptions = () => {
     const [searchQuery, setSearchQuery] = useState("");
