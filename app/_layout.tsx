@@ -1,5 +1,5 @@
 import {SplashScreen, Stack, usePathname, useGlobalSearchParams} from "expo-router";
-import '@/global.css';
+import '../global.css';
 import {useFonts} from "expo-font";
 import {useEffect, useRef} from "react";
 import { ClerkProvider, useAuth } from '@clerk/expo';
