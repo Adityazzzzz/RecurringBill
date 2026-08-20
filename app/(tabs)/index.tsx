@@ -1,7 +1,6 @@
 import {FlatList, Image, Pressable, Text, View} from "react-native";
 import {SafeAreaView} from "react-native-safe-area-context";
 import images from "@/constants/images";
-import {HOME_BALANCE} from "@/constants/data";
 import { icons } from "@/constants/icon";
 import {formatCurrency} from "@/lib/utils";
 import dayjs from "dayjs";
@@ -19,7 +18,48 @@ export default function App() {
     const posthog = usePostHog();
     const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<string | null>(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const { subscriptions, addSubscription } = useSubscriptionStore();
+    const { subscriptions, addSubscription, baseCurrency } = useSubscriptionStore();
+ 
+    // Calculate dynamic monthly commitment converted to selected base currency
+    const totalMonthlySpend = useMemo(() => {
+        return subscriptions
+            .filter(sub => sub.status === 'active')
+            .reduce((total, sub) => {
+                let monthlyPrice = sub.price;
+                if (sub.billing === 'Yearly') {
+                    monthlyPrice = sub.price / 12;
+                } else if (sub.billing === 'Weekly') {
+                    monthlyPrice = sub.price * 4.33;
+                } else if (sub.billing === 'Daily') {
+                    monthlyPrice = sub.price * 30;
+                }
+                
+                const fromCurrency = sub.currency || 'USD';
+                const toCurrency = baseCurrency;
+                const EXCHANGE_RATES: Record<string, number> = {
+                  USD: 1.0,
+                  EUR: 0.92,
+                  GBP: 0.79,
+                  INR: 83.50,
+                };
+                const rateFrom = EXCHANGE_RATES[fromCurrency.toUpperCase()] || 1.0;
+                const rateTo = EXCHANGE_RATES[toCurrency.toUpperCase()] || 1.0;
+                const converted = (monthlyPrice / rateFrom) * rateTo;
+                
+                return total + converted;
+            }, 0);
+    }, [subscriptions, baseCurrency]);
+
+    // Find the next closest renewal date among active subscriptions
+    const nextRenewalDate = useMemo(() => {
+        const activeSubs = subscriptions.filter(sub => sub.status === 'active' && sub.renewalDate);
+        if (activeSubs.length === 0) return null;
+        
+        const sorted = [...activeSubs].sort((a, b) => 
+            dayjs(a.renewalDate).diff(dayjs(b.renewalDate))
+        );
+        return sorted[0].renewalDate;
+    }, [subscriptions]);
 
     // Get upcoming subscriptions (active subscriptions with renewal date within next 7 days)
     const upcomingSubscriptions = useMemo(() => {
@@ -79,15 +119,15 @@ export default function App() {
                                 </Pressable>
                             </View>
 
-                            <View className="home-balance-card">
-                                <Text className="home-balance-label">Balance</Text>
+                             <View className="home-balance-card">
+                                <Text className="home-balance-label">Monthly Spend</Text>
 
                                 <View className="home-balance-row">
                                     <Text className="home-balance-amount">
-                                        {formatCurrency(HOME_BALANCE.amount)}
+                                        {formatCurrency(totalMonthlySpend, 'USD', baseCurrency)}
                                     </Text>
                                     <Text className="home-balance-date">
-                                        {dayjs(HOME_BALANCE.nextRenewalDate).format('MM/DD')}
+                                        {nextRenewalDate ? `Next: ${dayjs(nextRenewalDate).format('MM/DD')}` : 'No renewals'}
                                     </Text>
                                 </View>
                             </View>
