@@ -1,15 +1,29 @@
 import dayjs from "dayjs";
+import { useSubscriptionStore } from "./subscriptionStore";
 
-export const formatCurrency = (value: number, currency = "USD"): string => {
+const EXCHANGE_RATES: Record<string, number> = {
+  USD: 1.0,
+  EUR: 0.92,
+  GBP: 0.79,
+  INR: 83.50,
+};
+
+export const formatCurrency = (value: number, fromCurrency = "USD", toCurrency?: string): string => {
+  const targetCurrency = toCurrency || useSubscriptionStore.getState().baseCurrency || "USD";
+  
+  const rateFrom = EXCHANGE_RATES[fromCurrency.toUpperCase()] || 1.0;
+  const rateTo = EXCHANGE_RATES[targetCurrency.toUpperCase()] || 1.0;
+  const convertedValue = (value / rateFrom) * rateTo;
+
   try {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency,
+      currency: targetCurrency,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(value);
+    }).format(convertedValue);
   } catch {
-    return value.toFixed(2);
+    return `${targetCurrency} ${convertedValue.toFixed(2)}`;
   }
 };
 
