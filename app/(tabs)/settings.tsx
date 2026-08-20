@@ -484,7 +484,8 @@ const Settings = () => {
                 visible={currencyModalVisible}
                 onRequestClose={() => setCurrencyModalVisible(false)}
             >
-                <Pressable className="modal-overlay justify-center items-center p-5" onPress={() => setCurrencyModalVisible(false)}>
+                <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+                    <Pressable style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} onPress={() => setCurrencyModalVisible(false)} />
                     <View className="w-full max-w-sm rounded-3xl bg-background border border-border p-5 gap-4">
                         <Text className="text-lg font-sans-bold text-primary">Select Currency</Text>
                         <View className="gap-2">
@@ -510,7 +511,7 @@ const Settings = () => {
                             ))}
                         </View>
                     </View>
-                </Pressable>
+                </View>
             </Modal>
 
             {/* Reminder Offset Selector Modal */}
@@ -520,7 +521,8 @@ const Settings = () => {
                 visible={reminderModalVisible}
                 onRequestClose={() => setReminderModalVisible(false)}
             >
-                <Pressable className="modal-overlay justify-center items-center p-5" onPress={() => setReminderModalVisible(false)}>
+                <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+                    <Pressable style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} onPress={() => setReminderModalVisible(false)} />
                     <View className="w-full max-w-sm rounded-3xl bg-background border border-border p-5 gap-4">
                         <Text className="text-lg font-sans-bold text-primary">Select Reminder Window</Text>
                         <View className="gap-2">
@@ -541,7 +543,7 @@ const Settings = () => {
                             ))}
                         </View>
                     </View>
-                </Pressable>
+                </View>
             </Modal>
         </SafeAreaView>
     )
