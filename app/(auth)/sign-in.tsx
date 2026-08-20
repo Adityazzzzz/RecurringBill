@@ -1,14 +1,63 @@
 import { View, Text, TextInput, Pressable, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { Link, useRouter, type Href } from 'expo-router';
-import { useSignIn } from '@clerk/expo';
-import { useState } from 'react';
+import { useSignIn, useSSO } from '@clerk/expo';
+import { useState, useEffect, useCallback } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { usePostHog } from 'posthog-react-native';
+import { FontAwesome } from '@expo/vector-icons';
+import * as Linking from 'expo-linking';
+import * as WebBrowser from 'expo-web-browser';
+
+WebBrowser.maybeCompleteAuthSession();
+
+export const useWarmUpBrowser = () => {
+    useEffect(() => {
+        void WebBrowser.warmUpAsync();
+        return () => {
+            void WebBrowser.coolDownAsync();
+        };
+    }, []);
+};
 
 const SignIn = () => {
     const { signIn, errors, fetchStatus } = useSignIn();
     const router = useRouter();
     const posthog = usePostHog();
+
+    useWarmUpBrowser();
+    const { startSSOFlow } = useSSO();
+
+    const handleGoogleSignIn = useCallback(async () => {
+        try {
+            const { createdSessionId, setActive } = await startSSOFlow({
+                strategy: 'oauth_google',
+                redirectUrl: Linking.createURL('/(tabs)', { scheme: 'recurringbill' }),
+            });
+
+            if (createdSessionId && setActive) {
+                await setActive({ session: createdSessionId });
+                router.replace('/(tabs)');
+            }
+        } catch (err) {
+            console.error('Google OAuth error', err);
+        }
+    }, [startSSOFlow, router]);
+
+    const handleAppleSignIn = useCallback(async () => {
+        try {
+            const { createdSessionId, setActive } = await startSSOFlow({
+                strategy: 'oauth_apple',
+                redirectUrl: Linking.createURL('/(tabs)', { scheme: 'recurringbill' }),
+            });
+
+            if (createdSessionId && setActive) {
+                await setActive({ session: createdSessionId });
+                router.replace('/(tabs)');
+            }
+        } catch (err) {
+            console.error('Apple OAuth error', err);
+        }
+    }, [startSSOFlow, router]);
 
     const [emailAddress, setEmailAddress] = useState('');
     const [password, setPassword] = useState('');
@@ -289,12 +338,35 @@ const SignIn = () => {
                                         {fetchStatus === 'fetching' ? 'Signing In...' : 'Sign In'}
                                     </Text>
                                 </Pressable>
+
+                                <View className="auth-divider-row">
+                                    <View className="auth-divider-line" />
+                                    <Text className="auth-divider-text">Or continue with</Text>
+                                    <View className="auth-divider-line" />
+                                </View>
+
+                                <View className="flex-row gap-3">
+                                    <Pressable
+                                        className="flex-1 flex-row items-center justify-center rounded-2xl border border-border bg-background py-3.5 gap-2"
+                                        onPress={handleGoogleSignIn}
+                                    >
+                                        <FontAwesome name="google" size={18} color="#081126" />
+                                        <Text className="text-sm font-sans-bold text-primary">Google</Text>
+                                    </Pressable>
+                                    <Pressable
+                                        className="flex-1 flex-row items-center justify-center rounded-2xl border border-border bg-background py-3.5 gap-2"
+                                        onPress={handleAppleSignIn}
+                                    >
+                                        <FontAwesome name="apple" size={18} color="#081126" />
+                                        <Text className="text-sm font-sans-bold text-primary">Apple</Text>
+                                    </Pressable>
+                                </View>
                             </View>
                         </View>
 
                         {/* Sign-Up Link */}
                         <View className="auth-link-row">
-                            <Text className="auth-link-copy">Don't have an account?</Text>
+                            <Text className="auth-link-copy">Don&apos;t have an account?</Text>
                             <Link href="/(auth)/sign-up" asChild>
                                 <Pressable>
                                     <Text className="auth-link">Create Account</Text>
