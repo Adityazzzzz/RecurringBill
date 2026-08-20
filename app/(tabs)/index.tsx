@@ -1,7 +1,6 @@
 import {FlatList, Image, Pressable, Text, View} from "react-native";
 import {SafeAreaView} from "react-native-safe-area-context";
 import images from "@/constants/images";
-import {HOME_BALANCE} from "@/constants/data";
 import { icons } from "@/constants/icon";
 import {formatCurrency} from "@/lib/utils";
 import dayjs from "dayjs";
